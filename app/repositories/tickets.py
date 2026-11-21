@@ -3,7 +3,7 @@ import uuid
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import Event, Ticket
+from app.models import Event, Outbox, Ticket
 
 
 class SQLAlchemyTicketRepository:
@@ -43,6 +43,16 @@ class SQLAlchemyTicketRepository:
             seat=seat,
         )
         self.db.add(new_ticket)
+
+        outbox_rec = Outbox(
+                event_type = "ticket_registered",
+                payload = {
+                    "ticket_id": str(ticket_id),
+                    "message": f"Вы успешно зарегистрированы на мероприятие. Билет: {ticket_id}"
+                    },
+                status="PENDING"
+                )
+        self.db.add(outbox_rec)
         await self.db.flush()
 
     async def delete(self, ticket_id: uuid.UUID) -> None:

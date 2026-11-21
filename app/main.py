@@ -19,7 +19,7 @@ from app.exceptions import (
     TicketNotFoundError,
 )
 from app.routers import events, system, tickets
-from app.workers import run_sync_periodically
+from app.workers import run_sync_outbox, run_sync_periodically
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -36,10 +36,13 @@ async def lifespan(app: FastAPI):
     )
 
     sync_task = asyncio.create_task(run_sync_periodically())
+    outbox_task = asyncio.create_task(run_sync_outbox())
     logger.info("Фоновая синхронизация запущена!")
     yield
 
     sync_task.cancel()
+    outbox_task.cancel()
+
     try:
         await sync_task
     except asyncio.CancelledError:

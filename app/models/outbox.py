@@ -17,11 +17,11 @@ class Outbox(Base):
     event_type: Mapped[str] = mapped_column(String(200), nullable=False)
     payload: Mapped[dict] = mapped_column(JSON, nullable=False)
     status: Mapped[str] = mapped_column(
-            String(50), 
-            nullable=False, 
+            String(50),
+            nullable=False,
             default="PENDING")
     attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     created_at: Mapped[datetime]= mapped_column(
-            DateTime, 
-            nullable=False, 
+            DateTime,
+            nullable=False,
             default=lambda: datetime.now(UTC))
