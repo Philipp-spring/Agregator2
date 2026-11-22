@@ -20,7 +20,7 @@ class OutboxRepository:
             .limit(limit)
             )
 
-        result = await self.db.scalars(stmt)
+        result = await self.db.execute(stmt)
         return result.all()
 
     async def mark_as_sent(self, outbox_id: uuid.UUID):
