@@ -12,6 +12,13 @@ class CapashinoClient:
                 "idempotency_key": idempotency_key,
                 }
         
-        response  = await self.client.post("/api/notifications", json=payload)
+        response = await self.client.post("/api/notifications", json=payload)
+
+        if response.status_code >= 400:
+            # Выводим тело ошибки в лог, чтобы понять причину
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error("Capashino error %s: %s", response.status_code, response.text)
+
         response.raise_for_status()
         return response.json()
