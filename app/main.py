@@ -12,12 +12,12 @@ from app.database import async_engine
 from app.exceptions import (
     EventNotFoundError,
     EventNotPublishedError,
+    IdempotencyConflictError,
     ProviderError,
     RegistrationDeadlinePassedError,
     SeatNotAvailableError,
     TicketIdMissingError,
     TicketNotFoundError,
-    IdempotencyConflictError,
 )
 from app.routers import events, system, tickets
 from app.workers import run_sync_outbox, run_sync_periodically

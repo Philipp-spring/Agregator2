@@ -4,8 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.clients.provider import EventsProviderClient
 from app.db_depends import get_async_db
 from app.repositories.events import SQLAlchemyEventRepository
-from app.repositories.tickets import SQLAlchemyTicketRepository
 from app.repositories.idempotency import IdempotencyRepository
+from app.repositories.tickets import SQLAlchemyTicketRepository
 from app.services.events import EventService
 from app.services.sync import SyncService
 from app.services.tickets import TicketService

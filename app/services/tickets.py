@@ -11,15 +11,15 @@ from app.enums import EventStatus
 from app.exceptions import (
     EventNotFoundError,
     EventNotPublishedError,
+    IdempotencyConflictError,
     ProviderError,
     RegistrationDeadlinePassedError,
     SeatNotAvailableError,
     TicketIdMissingError,
     TicketNotFoundError,
-    IdempotencyConflictError,
 )
-from app.repositories.tickets import SQLAlchemyTicketRepository
 from app.repositories.idempotency import IdempotencyRepository
+from app.repositories.tickets import SQLAlchemyTicketRepository
 
 logger = logging.getLogger(__name__)
 
