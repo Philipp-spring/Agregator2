@@ -1,4 +1,5 @@
 import logging
+import asyncio
 
 from app.clients.capashino import CapashinoClient
 from app.repositories.outbox import OutboxRepository
