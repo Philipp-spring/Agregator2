@@ -16,4 +16,4 @@ class Ticket(Base):
     email: Mapped[str]
     seat: Mapped[str]
 
-    event: Mapped["Event"] = relationship("Event", back_populates="tickets")
+    event: Mapped["Event"] = relationship("Event", back_populates="tickets", lazy="raise")
