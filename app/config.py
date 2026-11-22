@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     api_base_url: str = (
         "http://student-system-events-provider-web.student-system-events-provider.svc:8000"
     )
-    capashino_url: str = "https://capashino.dev-2.python-labs.ru"
+    capashino_url: str = "http://student-system-capashino-web.student-system-capashino.svc:8000"
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
