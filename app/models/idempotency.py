@@ -14,7 +14,7 @@ class IdempotencyKey(Base):
     request_hash: Mapped[str] = mapped_column(String(64), nullable=False)
     ticket_id: Mapped[uuid.UUID] = mapped_column(
             UUID(as_uuid=True), 
-            ForeignKey("tickets.id"), 
+            ForeignKey("tickets.id", ondelete="CASCADE"), 
             nullable=False
             )
     created_at: Mapped[datetime] = mapped_column(
