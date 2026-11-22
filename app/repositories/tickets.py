@@ -15,14 +15,12 @@ class SQLAlchemyTicketRepository:
     async def get_event(self, event_id: uuid.UUID) -> Event | None:
         """Получить событие из локальной БД для валидации"""
         stmt = select(Event).where(Event.id == event_id)
-        event = await self.db.scalars(stmt)
-        return event.first()
+        return await self.db.scalar(stmt)
 
     async def get_ticket_by_id(self, ticket_id: uuid.UUID) -> Ticket | None:
         """Получить билет из БД по его ID"""
         stmt = select(Ticket).where(Ticket.id == ticket_id)
-        res = await self.db.scalars(stmt)
-        return res.first()
+        return await self.db.scalar(stmt)
 
     async def create(
         self,
