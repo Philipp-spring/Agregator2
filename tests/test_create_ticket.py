@@ -7,8 +7,8 @@ import pytest
 from app.clients.provider import EventsProviderClient
 from app.exceptions import EventNotFoundError
 from app.models import Event
-from app.repositories.tickets import SQLAlchemyTicketRepository
 from app.repositories.idempotency import IdempotencyRepository
+from app.repositories.tickets import SQLAlchemyTicketRepository
 from app.services.tickets import TicketService
 
 
