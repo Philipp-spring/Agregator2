@@ -32,4 +32,4 @@ class OutboxService:
             except Exception as e:
                 await self.repo.rollback()
                 await self.repo.increment_attempts(record_id)
-                logger.error("Ошибка при отправке %s: %s", record_id, e)
+                logger.error("Ошибка при отправке %s: %r", record_id, e)
