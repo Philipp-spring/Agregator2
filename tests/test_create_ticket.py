@@ -8,6 +8,7 @@ from app.clients.provider import EventsProviderClient
 from app.exceptions import EventNotFoundError
 from app.models import Event
 from app.repositories.tickets import SQLAlchemyTicketRepository
+from app.repositories.idempotency import IdempotencyRepository
 from app.services.tickets import TicketService
 
 
@@ -16,6 +17,7 @@ async def test_create_ticket_success():
     """Тест: успешное создание билета."""
     mock_repo = AsyncMock(spec=SQLAlchemyTicketRepository)
     mock_client = AsyncMock(spec=EventsProviderClient)
+    mock_idem_repo = AsyncMock(spec=IdempotencyRepository)
     
     mock_repo.db = AsyncMock()
 
@@ -35,7 +37,7 @@ async def test_create_ticket_success():
     mock_client.get_seats.return_value = {"seats": ["A1", "A2", "A3"]}
     mock_client.register.return_value = {"ticket_id": str(uuid.uuid4())}
     
-    service = TicketService(client=mock_client, repo=mock_repo)
+    service = TicketService(client=mock_client, repo=mock_repo, idem_repo=mock_idem_repo)
     
     ticket_id = await service.create_ticket(
         event_id=event_id,
@@ -56,11 +58,12 @@ async def test_create_ticket_event_not_found():
     """Тест: если события нет в БД, выбрасывается 404."""
     mock_repo = AsyncMock(spec=SQLAlchemyTicketRepository)
     mock_client = AsyncMock(spec=EventsProviderClient)
+    mock_idem_repo = AsyncMock(spec=IdempotencyRepository)
     mock_repo.db = AsyncMock() 
     
     mock_repo.get_event.return_value = None
     
-    service = TicketService(client=mock_client, repo=mock_repo)
+    service = TicketService(client=mock_client, repo=mock_repo, idem_repo=mock_idem_repo)
     
     with pytest.raises(EventNotFoundError) as exc_info:
         await service.create_ticket(
