@@ -11,6 +11,7 @@ class TicketCreate(BaseModel):
     last_name: str = Field(min_length=1, max_length=100)
     email: EmailStr
     seat: str = Field(min_length=1, max_length=10, pattern=r"^[A-Za-z]\d+$")
+    idempotency_key: str | None = Field(default=None, max_length=250)
 
 
 class TicketOut(BaseModel):

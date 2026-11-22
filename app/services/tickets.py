@@ -1,3 +1,5 @@
+import hashlib
+import json
 import logging
 import uuid
 from datetime import UTC, datetime
@@ -14,21 +16,53 @@ from app.exceptions import (
     SeatNotAvailableError,
     TicketIdMissingError,
     TicketNotFoundError,
+    IdempotencyConflictError,
 )
 from app.repositories.tickets import SQLAlchemyTicketRepository
+from app.repositories.idempotency import IdempotencyRepository
 
 logger = logging.getLogger(__name__)
 
 
 class TicketService:
     """Бизнес-сценарий создания билета с интеграцией провайдера."""
-    def __init__(self, client: EventsProviderClient, repo: SQLAlchemyTicketRepository):
+    def __init__(self, 
+                 client: EventsProviderClient, 
+                 repo: SQLAlchemyTicketRepository, 
+                 idem_repo: IdempotencyRepository):
         self.client = client
         self.repo = repo
+        self.idem_repo = idem_repo
+    
 
+    def _calculate_hash(self, event_id, first_name, last_name, email, seat) -> str:
+        """Вычисление хэша для """
+        canonical = {
+            "event_id": str(event_id),
+            "first_name": first_name.strip().lower(),
+            "last_name": last_name.strip().lower(),
+            "email": email.strip().lower(),
+            "seat": seat.strip().lower(),
+        }
+        raw = json.dumps(canonical, sort_keys=True, separators=(",", ":"))
+        return hashlib.sha256(raw.encode()).hexdigest()
+
+    
     async def create_ticket(
-        self, event_id: uuid.UUID, first_name: str, last_name: str, email: str, seat: str
+        self, event_id: uuid.UUID, first_name: str, last_name: str, email: str, seat: str, idempotency_key: str | None = None
     ) -> str:
+        """Логика биоета"""
+
+        req_hash = None
+        if idempotency_key:
+            req_hash = self._calculate_hash(event_id, first_name, last_name, email, seat)
+            existing = await self.idem_repo.get_by_key(idempotency_key)
+            if existing:
+                if existing.request_hash != req_hash:
+                    raise IdempotencyConflictError("Ключ идемпотентности уже использован с другими данными")
+                return str(existing.ticket_id)
+
+
         event = await self.repo.get_event(event_id)
         if not event:
             logger.warning("Попытка регистрации на несуществующее событие %s", event_id)
@@ -72,6 +106,13 @@ class TicketService:
             email=email,
             seat=seat,
         )
+
+        if idempotency_key:
+            await self.idem_repo.create(
+                key=idempotency_key, 
+                request_hash=req_hash, 
+                ticket_id=uuid.UUID(ticket_id)
+            )
 
         await self.repo.commit()
 

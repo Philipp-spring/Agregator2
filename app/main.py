@@ -17,6 +17,7 @@ from app.exceptions import (
     SeatNotAvailableError,
     TicketIdMissingError,
     TicketNotFoundError,
+    IdempotencyConflictError,
 )
 from app.routers import events, system, tickets
 from app.workers import run_sync_outbox, run_sync_periodically
@@ -97,6 +98,13 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     return JSONResponse(
         status_code=400,
         content={"detail": "Ошибка валидации входных данных"},
+    )
+
+@app.exception_handler(IdempotencyConflictError)
+async def idempotency_conflict_exception_handler(request: Request, exc: IdempotencyConflictError):
+    return JSONResponse(
+        status_code=409,
+        content={"detail": str(exc)},
     )
 
 

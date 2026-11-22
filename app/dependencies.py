@@ -5,6 +5,7 @@ from app.clients.provider import EventsProviderClient
 from app.db_depends import get_async_db
 from app.repositories.events import SQLAlchemyEventRepository
 from app.repositories.tickets import SQLAlchemyTicketRepository
+from app.repositories.idempotency import IdempotencyRepository
 from app.services.events import EventService
 from app.services.sync import SyncService
 from app.services.tickets import TicketService
@@ -28,7 +29,8 @@ async def get_create_ticket(
     client: EventsProviderClient = Depends(get_events_client),
 ) -> TicketService:
     repo = SQLAlchemyTicketRepository(db)
-    return TicketService(client=client, repo=repo)
+    idem_repo = IdempotencyRepository(db)
+    return TicketService(client=client, repo=repo, idem_repo=idem_repo)
 
 
 async def get_sync_service(

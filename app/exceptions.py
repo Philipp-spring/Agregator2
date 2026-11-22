@@ -28,3 +28,6 @@ class ProviderError(DomainError):
 
 class TicketNotFoundError(DomainError):
     """Билет не найден в базе данных"""
+
+class IdempotencyConflictError(DomainError):
+    """Ключ идемпотентности уже использован с другими данными"""

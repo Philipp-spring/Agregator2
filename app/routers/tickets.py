@@ -20,6 +20,7 @@ async def create_ticket(
         last_name=ticket_data.last_name,
         email=ticket_data.email,
         seat=ticket_data.seat,
+        idempotency_key=ticket_data.idempotency_key,
     )
     return {"ticket_id": ticket_id}
 
