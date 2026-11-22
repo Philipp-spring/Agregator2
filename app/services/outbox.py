@@ -17,12 +17,11 @@ class OutboxService:
         if not pending_records:
             return 
 
-        for record in pending_records:
-            record_id = record.id
+        for record_id, payload in pending_records:
             try:
                 await self.client.send_notification(
-                        message=record.payload["message"],
-                        reference_id=record.payload["ticket_id"],
+                        message=payload["message"],
+                        reference_id=payload["ticket_id"],
                         idempotency_key=str(record_id)
                         )
 

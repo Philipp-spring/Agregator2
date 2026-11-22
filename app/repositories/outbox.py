@@ -14,7 +14,7 @@ class OutboxRepository:
     async def get_pending(self, limit: int = 10):
         """Получение ожидающих отправки записей"""
         stmt = (
-            select(Outbox)
+            select(Outbox.id, Outbox.payload)
             .where(Outbox.status == "PENDING")
             .where(Outbox.attempts < 5)
             .limit(limit)
