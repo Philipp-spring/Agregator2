@@ -18,18 +18,19 @@ class OutboxService:
             return 
 
         for record in pending_records:
+            record_id = record.id
             try:
                 await self.client.send_notification(
                         message=record.payload["message"],
                         reference_id=record.payload["ticket_id"],
-                        idempotency_key=str(record.id)
+                        idempotency_key=str(record_id)
                         )
 
-                await self.repo.mark_as_sent(record.id)
+                await self.repo.mark_as_sent(record_id)
                 await self.repo.commit()
-                logger.info("Уведомление %s успешно отправлено", record.id)
+                logger.info("Уведомление %s успешно отправлено", record_id)
 
             except Exception as e:
                 await self.repo.rollback()
-                await self.repo.increment_attempts(record.id)
-                logger.error("Ошибка при отправке %s: %s", record.id, e)
+                await self.repo.increment_attempts(record_id)
+                logger.error("Ошибка при отправке %s: %s", record_id, e)
