@@ -1,6 +1,7 @@
+import logging
+
 import httpx
 
-import logging
 logger = logging.getLogger(__name__)
 
 class CapashinoClient:
