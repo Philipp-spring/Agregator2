@@ -127,3 +127,9 @@ app.include_router(system.router)
 async def welcome() -> dict:
     """Корневой маршрут"""
     return {"message": "Агрегатор"}
+
+
+@app.get("/debug-sentry")
+async def debug_sentry():
+    return 1 / 0
+
