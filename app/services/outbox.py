@@ -1,4 +1,3 @@
-import asyncio
 import logging
 
 from app.clients.capashino import CapashinoClient
@@ -13,14 +12,13 @@ class OutboxService:
 
     async def process_pending(self):
         """Берет пачку записей из БД (таблицы outbox) и отправляет их в Capashino"""
-        pending_records = await self.repo.get_pending(limit=1)
+        pending_records = await self.repo.get_pending(limit=10)
 
         if not pending_records:
             return 
 
         for record_id, payload in pending_records:
             try:
-                await asyncio.sleep(0.5)
                 await self.client.send_notification(
                         message=payload["message"],
                         reference_id=payload["ticket_id"],
