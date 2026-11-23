@@ -1,4 +1,4 @@
-from pydantic import computed_field
+from pydantic import AliasChoices, Field, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -17,6 +17,13 @@ class Settings(BaseSettings):
     )
     capashino_url: str = "http://student-system-capashino-web.student-system-capashino.svc:8000"
 
+    outbox_poll_interval: float = 5.0
+    outbox_batch_size: int = 10
+    outbox_max_retries: int = 5
+    idempotency_ttl_seconds: int = 86400
+
+    sentry_dsn: str | None = Field(default=None, validation_alias=AliasChoices("SENTRY_DSN", "GLITCHTIP_DSN"))
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     @computed_field
@@ -32,6 +39,8 @@ class Settings(BaseSettings):
             f"{self.postgres_password}@{self.postgres_host}:"
             f"{self.postgres_port}/{self.postgres_database_name}"
         )
+
+
 
 
 settings = Settings()

@@ -33,7 +33,7 @@ async def run_sync_outbox():
         except Exception as e:
             logger.error("Ошибка в воркере outbox: %s", e, exc_info=True)
 
-        await asyncio.sleep(5)
+        await asyncio.sleep(settings.outbox_poll_interval)
 
 
 

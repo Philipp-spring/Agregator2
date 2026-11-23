@@ -3,6 +3,7 @@ import uuid
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import settings
 from app.models import Outbox
 
 
@@ -16,7 +17,7 @@ class OutboxRepository:
         stmt = (
             select(Outbox.id, Outbox.payload)
             .where(Outbox.status == "PENDING")
-            .where(Outbox.attempts < 5)
+            .where(Outbox.attempts < settings.outbox_max_retries)
             .limit(limit)
             )
 
@@ -36,7 +37,7 @@ class OutboxRepository:
         record = await self.db.get(Outbox, outbox_id)
         if record:
             record.attempts += 1
-            if record.attempts >= 5:
+            if record.attempts >= settings.outbox_max_retries:
                 record.status  = "FAILED"
         await self.db.flush()
 

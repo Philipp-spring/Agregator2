@@ -15,6 +15,7 @@ dependencies = [
     "pydantic[email]",
     "pydantic-settings",
     "httpx",
+    "sentry-sdk[fastapi]>=3.0.0",
 ]
 
 

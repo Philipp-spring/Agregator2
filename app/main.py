@@ -3,9 +3,11 @@ import logging
 from contextlib import asynccontextmanager
 
 import httpx
+import sentry_sdk
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from sentry_sdk.integrations.fastapi import FastApiIntegration
 
 from app.config import settings
 from app.database import async_engine
@@ -24,6 +26,13 @@ from app.workers import run_sync_outbox, run_sync_periodically
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
+
+if settings.sentry_dsn:
+    sentry_sdk.init(
+            dsn=settings.sentry_dsn,
+            integrations=[FastApiIntegration()],
+            traces_sample_rate=1.0
+            )
 
 
 @asynccontextmanager
@@ -44,10 +53,11 @@ async def lifespan(app: FastAPI):
     sync_task.cancel()
     outbox_task.cancel()
 
-    try:
-        await sync_task
-    except asyncio.CancelledError:
-        pass
+    for task in (sync_task, outbox_task):
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
 
     await app.state.http_client.aclose()
     await async_engine.dispose()

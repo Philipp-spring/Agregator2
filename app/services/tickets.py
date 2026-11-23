@@ -7,6 +7,7 @@ from datetime import UTC, datetime
 import httpx
 
 from app.clients.provider import EventsProviderClient
+from app.config import settings
 from app.enums import EventStatus
 from app.exceptions import (
     EventNotFoundError,
@@ -36,7 +37,7 @@ class TicketService:
     
 
     def _calculate_hash(self, event_id, first_name, last_name, email, seat) -> str:
-        """Вычисление хэша для """
+        """Вычисление хэша запроса"""
         canonical = {
             "event_id": str(event_id),
             "first_name": first_name.strip().lower(),
@@ -51,16 +52,19 @@ class TicketService:
     async def create_ticket(
         self, event_id: uuid.UUID, first_name: str, last_name: str, email: str, seat: str, idempotency_key: str | None = None
     ) -> str:
-        """Логика биоета"""
+        """логика билета"""
 
         req_hash = None
         if idempotency_key:
             req_hash = self._calculate_hash(event_id, first_name, last_name, email, seat)
-            existing = await self.idem_repo.get_by_key(idempotency_key)
+            existing = await self.idem_repo.get_key(idempotency_key)
             if existing:
-                if existing.request_hash != req_hash:
-                    raise IdempotencyConflictError("Ключ идемпотентности уже использован с другими данными")
-                return str(existing.ticket_id)
+                if (datetime.now(UTC) - existing.created_at).total_seconds() >= settings.idempotency_ttl_seconds:
+                    await self.idem_repo.delete_key(idempotency_key)
+                else:
+                    if existing.request_hash != req_hash:
+                        raise IdempotencyConflictError("ключ идемпотентности уже использован с другими данными")
+                    return str(existing.ticket_id)
 
 
         event = await self.repo.get_event(event_id)
@@ -108,7 +112,7 @@ class TicketService:
         )
 
         if idempotency_key:
-            await self.idem_repo.create(
+            await self.idem_repo.create_key(
                 key=idempotency_key, 
                 request_hash=req_hash, 
                 ticket_id=uuid.UUID(ticket_id)

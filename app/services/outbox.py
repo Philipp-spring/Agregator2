@@ -1,6 +1,7 @@
 import logging
 
 from app.clients.capashino import CapashinoClient
+from app.config import settings
 from app.repositories.outbox import OutboxRepository
 
 logger = logging.getLogger(__name__)
@@ -12,7 +13,7 @@ class OutboxService:
 
     async def process_pending(self):
         """Берет пачку записей из БД (таблицы outbox) и отправляет их в Capashino"""
-        pending_records = await self.repo.get_pending(limit=10)
+        pending_records = await self.repo.get_pending(settings.outbox_batch_size)
 
         if not pending_records:
             return 
@@ -32,4 +33,5 @@ class OutboxService:
             except Exception as e:
                 await self.repo.rollback()
                 await self.repo.increment_attempts(record_id)
+                await self.repo.commit()
                 logger.error("Ошибка при отправке %s: %r", record_id, e)
