@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 async def run_sync_outbox():
-    """Бесконечный цикл, запускает синхронизацию раз 60 секунд"""
+    """Бесконечный цикл, запускает синхронизацию раз  секунд"""
     while True:
         try:
             logger.info("Запуск фоновой синхронизации outbox...")
@@ -33,7 +33,7 @@ async def run_sync_outbox():
         except Exception as e:
             logger.error("Ошибка в воркере outbox: %s", e, exc_info=True)
 
-        await asyncio.sleep(60)
+        await asyncio.sleep(5)
 
 
 
