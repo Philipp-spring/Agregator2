@@ -31,7 +31,7 @@ class SQLAlchemyTicketRepository:
         email: str,
         seat: str,
     ) -> None:
-        """Создание и сохранение объекта билета в локальную БД после ответа от внешнего API."""
+        """Создание и сохранение объекта билета в локальную БД после ответа от внешнего API"""
         new_ticket = Ticket(
             id=ticket_id,
             event_id=event_id,

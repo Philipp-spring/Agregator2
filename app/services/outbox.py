@@ -21,9 +21,9 @@ class OutboxService:
         for record_id, payload in pending_records:
             try:
                 await self.client.send_notification(
+                        idempotency_key=str(record_id),
                         message=payload["message"],
                         reference_id=payload["ticket_id"],
-                        idempotency_key=str(record_id)
                         )
 
                 await self.repo.mark_as_sent(record_id)

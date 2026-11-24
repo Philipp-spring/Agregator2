@@ -5,6 +5,7 @@ import httpx
 import pytest
 
 from app.clients.provider import EventsProviderClient
+from app.clients.capashino import CapashinoClient
 from app.config import settings
 
 
@@ -112,3 +113,61 @@ async def test_get_events_with_cursor():
     cursor = "https://events-provider.dev-2.python-labs.ru/api/events/?cursor=xyz"
     result = await client.get_events(cursor=cursor)
     assert result["results"] == [{"id": "1"}]
+
+
+@pytest.mark.asyncio
+async def test_send_notification_success():
+    """Тест: клиент успешно отправляет уведомление с ключом идемпотентности."""
+    mock_client = AsyncMock()
+    mock_client.post.return_value = Mock(
+            status_code=200,
+            json=lambda: {"status": "sent"}, 
+            raise_for_status=lambda: None,
+            )
+
+    client = CapashinoClient(mock_client)
+
+    result = await client.send_notification(
+            message="Ваш билет оформлен",
+            reference_id="ticket-123",
+            idempotency_key="outbox-42",
+            )
+
+    assert result == {"status": "sent"}
+    mock_client.post.assert_awaited_once_with(
+            "/api/notifications",
+            json={
+                "message": "Ваш билет оформлен", 
+                "reference_id": "ticket-123",
+                "idempotency_key": "outbox-42",
+            },
+            )
+
+
+@pytest.mark.asyncio
+async def test_send_notification_server_error():
+    """Тест: при ошибке 500 от сервера клиент выбрасывает HTTPStatusError"""
+    mock_client = AsyncMock()
+    mock_response = Mock(
+            status_code=500,
+            text="Internal Server Error", 
+            )
+
+    mock_response.raise_for_status.side_effect = httpx.HTTPStatusError(
+            "Server Error",
+            request=Mock(),
+            response=mock_response,
+            )
+
+    mock_client.post.return_value = mock_response
+
+    client = CapashinoClient(mock_client)
+
+    with pytest.raises(httpx.HTTPStatusError):
+        await client.send_notification(
+            message="Ваш билет оформлен",
+            reference_id="ticket-123",
+            idempotency_key="outbox-42",
+                )
+
+

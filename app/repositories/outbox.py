@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.models import Outbox
+from app.enums import OutboxStatus
 
 
 class OutboxRepository:
@@ -16,8 +17,9 @@ class OutboxRepository:
         """Получение ожидающих отправки записей"""
         stmt = (
             select(Outbox.id, Outbox.payload)
-            .where(Outbox.status == "PENDING")
+            .where(Outbox.status == OutboxStatus.PENDING)
             .where(Outbox.attempts < settings.outbox_max_retries)
+            .order_by(Outbox.created_at)
             .limit(limit)
             )
 
@@ -28,7 +30,7 @@ class OutboxRepository:
         """Помечает записи как отправленные"""
         record = await self.db.get(Outbox, outbox_id)
         if record:
-            record.status  = "SENT"
+            record.status  = OutboxStatus.SENT
             await self.db.flush()
 
 
@@ -38,8 +40,8 @@ class OutboxRepository:
         if record:
             record.attempts += 1
             if record.attempts >= settings.outbox_max_retries:
-                record.status  = "FAILED"
-        await self.db.flush()
+                record.status  = OutboxStatus.FAILED
+            await self.db.flush()
 
 
     async def commit(self):

@@ -48,7 +48,7 @@ class TicketService:
         raw = json.dumps(canonical, sort_keys=True, separators=(",", ":"))
         return hashlib.sha256(raw.encode()).hexdigest()
 
-    
+
     async def create_ticket(
         self, event_id: uuid.UUID, first_name: str, last_name: str, email: str, seat: str, idempotency_key: str | None = None
     ) -> str:
