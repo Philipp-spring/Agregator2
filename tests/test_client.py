@@ -4,8 +4,8 @@ from unittest.mock import AsyncMock, Mock
 import httpx
 import pytest
 
-from app.clients.provider import EventsProviderClient
 from app.clients.capashino import CapashinoClient
+from app.clients.provider import EventsProviderClient
 from app.config import settings
 
 

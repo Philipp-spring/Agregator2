@@ -1,7 +1,6 @@
+import uuid
 from unittest.mock import AsyncMock
 
-import uuid
-import httpx
 import pytest
 
 from app.clients.capashino import CapashinoClient

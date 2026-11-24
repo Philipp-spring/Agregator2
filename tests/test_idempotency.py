@@ -12,6 +12,7 @@ from app.repositories.idempotency import IdempotencyRepository
 from app.repositories.tickets import SQLAlchemyTicketRepository
 from app.services.tickets import TicketService
 
+
 def _make_mock_event(
             event_id: uuid.UUID | None = None, 
             status: str = "published",
