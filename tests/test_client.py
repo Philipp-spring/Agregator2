@@ -102,7 +102,7 @@ async def test_unregister_success():
 @pytest.mark.asyncio
 async def test_get_events_with_cursor():
     """Тест: клиент переходит по курсору (следующая страница)."""
-    mock_client = AsyncMock()
+    mock_client = AsyncMock(spec=httpx.AsyncClient)
     mock_client.send.return_value = Mock(
         json=lambda: {"results": [{"id": "1"}], "next": None},
         raise_for_status=lambda: None,

@@ -4,6 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Event, Outbox, Ticket
+from app.enums import OutboxStatus
 
 
 class SQLAlchemyTicketRepository:
@@ -31,7 +32,7 @@ class SQLAlchemyTicketRepository:
         email: str,
         seat: str,
     ) -> None:
-        """Создание и сохранение объекта билета в локальную БД после ответа от внешнего API"""
+        """Создание и сохранение объекта билета и записи Outbox в локальную БД после ответа от внешнего API"""
         new_ticket = Ticket(
             id=ticket_id,
             event_id=event_id,
@@ -48,7 +49,7 @@ class SQLAlchemyTicketRepository:
                     "ticket_id": str(ticket_id),
                     "message": f"Вы успешно зарегистрированы на мероприятие. Билет: {ticket_id}"
                     },
-                status="PENDING"
+                status=OutboxStatus.PENDING
                 )
         self.db.add(outbox_rec)
         await self.db.flush()

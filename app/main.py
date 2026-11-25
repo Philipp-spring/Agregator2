@@ -37,6 +37,7 @@ if settings.sentry_dsn:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """Управляет действиями при запуске и остановке приложения"""
     logger.info("Приложение запущено")
 
     app.state.http_client = httpx.AsyncClient(
