@@ -29,6 +29,7 @@ class Settings(BaseSettings):
     @computed_field
     @property
     def database_url(self) -> str:
+        """Формирует адрес БД в зависимости от того откуда запущена программа (Kubernetes или локально)"""
         if self.postgres_connection_string:
             conn_str = self.postgres_connection_string
             if conn_str.startswith("postgres://"):
