@@ -3,8 +3,8 @@ import uuid
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import Event, Outbox, Ticket
 from app.enums import OutboxStatus
+from app.models import Event, Outbox, Ticket
 
 
 class SQLAlchemyTicketRepository:
